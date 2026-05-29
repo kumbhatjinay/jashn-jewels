@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Jashn Jewels{% endblock %}
+{% block content %}
+
+<div class="row align-items-center mb-4">
+  <div class="col">
+    <h4 class="fw-bold mb-0" style="color:var(--gold-dark)"><i class="fas fa-gem me-2"></i>Dashboard</h4>
+  </div>
+  <div class="col-auto">
+    {% if gold %}
+    <span class="gold-rate-pill">
+      <i class="fas fa-coins"></i>
+      24k ₹{{ "{:,.0f}".format(gold.rate_24k) }}/g
+      <small style="opacity:.75;font-size:.75rem">{{ gold.fetched_at.strftime('%d %b %H:%M') }}</small>
+    </span>
+    {% endif %}
+  </div>
+</div>
