@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Products – Jashn Jewels{% endblock %}
+{% block content %}
+
+<div class="row align-items-center mb-3">
+  <div class="col"><h4 class="fw-bold mb-0" style="color:var(--gold-dark)"><i class="fas fa-ring me-2"></i>Products</h4></div>
+  <div class="col-auto d-flex gap-2">
+    {% if rate %}<span class="gold-rate-pill"><i class="fas fa-coins"></i>24k ₹{{ "{:,.0f}".format(rate) }}/g</span>{% endif %}
+    <a href="/products/add" class="btn btn-gold"><i class="fas fa-plus me-1"></i>Add Item</a>
+  </div>
+</div>
