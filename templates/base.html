@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Jashn Jewels{% endblock %}</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #B8860B; --gold-dark: #7B5E00; --gold-light: #FFF8DC; --gold-mid: #DAA520;
+    }
+    body { background: #fafaf8; font-family: 'Segoe UI', sans-serif; }
+    .navbar { background: linear-gradient(135deg, var(--gold-dark), var(--gold)) !important; }
+    .navbar-brand { color: #fff !important; font-weight: 700; font-size: 1.3rem; letter-spacing: 1px; }
+    .navbar-brand span { color: #FFE082; }
+    .nav-link { color: rgba(255,255,255,0.85) !important; }
+    .nav-link:hover, .nav-link.active { color: #fff !important; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold-mid)); color: #fff; border: none; }
+    .btn-gold:hover { background: linear-gradient(135deg, #5a4300, var(--gold-dark)); color: #fff; }
+    .badge-purity { background: var(--gold-light); color: var(--gold-dark); border: 1px solid var(--gold-mid); font-weight: 600; }
+    .gold-rate-pill { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #fff; border-radius: 50px; padding: 6px 18px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; }
+    .section-divider { border-top: 2px solid var(--gold-light); margin: 1.5rem 0; }
+    .input-label-sm { font-size: 0.78rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+    footer { color: #aaa; font-size: 0.8rem; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/"><i class="fas fa-gem me-2"></i>Jashn <span>Jewels</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products"><i class="fas fa-ring me-1"></i>Products</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products/add"><i class="fas fa-plus me-1"></i>Add Item</a></li>
+        <li class="nav-item"><a class="nav-link" href="/scan"><i class="fas fa-qrcode me-1"></i>Scan</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  {% block content %}{% endblock %}
+</div>
+
+<footer class="text-center py-3">Jashn Jewels Pricing System</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
