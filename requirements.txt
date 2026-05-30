@@ -4,4 +4,4 @@ psycopg2-binary==2.9.9
 apscheduler==3.10.4
 qrcode[pil]==7.4.2
 requests==2.31.0
-gunicorm==21.2.0
+gunicorn==21.2.0
