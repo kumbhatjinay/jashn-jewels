@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if product else "Add" }} Product – Jashn Jewels{% endblock %}
+{% block head %}
+<style>
+  .form-section { background:#fff; border-radius:12px; padding:1.5rem; margin-bottom:1rem; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .form-section h6 { color:var(--gold-dark); font-weight:700; border-bottom:2px solid var(--gold-light); padding-bottom:.5rem; margin-bottom:1rem; }
+  .pricing-preview { background:linear-gradient(135deg,var(--gold-dark),var(--gold-mid)); color:#fff; border-radius:12px; padding:1.25rem; }
+  .driver-btn { border:2px solid #dee2e6; border-radius:8px; padding:.5rem 1rem; cursor:pointer; transition:.2s; }
+  .driver-btn.active { border-color:var(--gold); background:var(--gold-light); }
+  .input-highlight { border:2px solid var(--gold) !important; background:var(--gold-light) !important; }
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row align-items-center mb-3">
+  <div class="col">
+    <h4 class="fw-bold mb-0" style="color:var(--gold-dark)">
+      <i class="fas fa-{{ 'edit' if product else 'plus-circle' }} me-2"></i>
+      {{ "Edit: " + product.name if product else "Add New Product" }}
+    </h4>
+  </div>
+  <div class="col-auto">
+    <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+  </div>
+</div>
+
+<form method="POST" id="productForm">
+<div class="form-section">
+  <h6><i class="fas fa-info-circle me-2"></i>Basic Information</h6>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="input-label-sm">SKU *</label><input type="text" name="sku" class="form-control" value="{{ product.sku if product else '' }}" required></div>
+    <div class="col-md-5"><label class="input-label-sm">Item Name *</label><input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required></div>
+    <div class="col-md-3"><label class="input-label-sm">Purity *</label><select name="purity" class="form-select" id="puritySelect" required>{{% for k in ["22k","18k","14k","9k","24k"] %}<option value="{{ k }}">{{ k }}</option>{% endfor %}</select></div>
+    <div class="col-12"><label class="input-label-sm">Notes</label><input type="text" name="notes" class="form-control" value="{{ product.notes if product else '' }}"></div>
+  </div>
+</div>
+<div class="form-section">
+  <h6><i class="fas fa-balance-scale me-2"></i>Weight (grams)</h6>
+  <div class="row g-3">
+    <div class="col-4"><label class="input-label-sm">Gross Weight *</label><input type="number" name="gross_weight" class="form-control" step="0.001" min="0" required value="{{ product.gross_weight if product else '' }}" id="grossWt"></div>
+    <div class="col-4"><label class="input-label-sm">Stone Weight</label><input type="number" name="stone_weight" class="form-control" step="0.001" min="0" value="{{ product.stone_weight if product else 0 }}" id="stoneWt"></div>
+    <div class="col-4"><label class="input-label-sm">Misc Weight</label><input type="number" name="misc_weight" class="form-control" step="0.001" min="0" value="{{ product.misc_weight if product else 0 }}" id="miscWt"></div>
+    <div class="col-12"><div class="p-2 rounded" style="background:var(--gold-light)">Net Gold Weight: <strong id="netWtDisplay">—</strong> g</div></div>
+  </div>
+</div>
+<div class="form-section">
+  <h6>Purchase Costing</h6>
+  <div class="row g-3">
+    <div class="col-md-3"><label class="input-label-sm">24k Rate at Purchase *</label><input type="number" name="purchase_rate_24k" class="form-control" step="0.01" min="1" required value="{{ product.purchase_rate_24k if product else rate }}" id="purchaseRate"></div>
+    <div class="col-md-3"><label class="input-label-sm">Purchase Premium</label><input type="number" name="purchase_premium" class="form-control" step="0.1" min="0" value="{{ product.purchase_premium if product else 4 }}" id="purchasePremium"></div>
+    <div class="col-md-3"><label class="input-label-sm">Stone Cost</label><input type="number" name="stone_cost" class="form-control" step="0.01" min="0" value="{{ product.stone_cost if product else 0 }}" id="stoneCost"></div>
+    <div class="col-md-3"><label class="input-label-sm">Misc Cost</label><input type="number" name="misc_cost" class="form-control" step="0.01" min="0" value="{{ product.misc_cost if product else 0 }}" id="miscCost"></div>
+    <div class="col-12"><div class="p-2 rounded" style="background:var(--gold-light)">Total Cost: <strong id="totalCostDisplay">—</strong></div></div>
+  </div>
+</div>
+<div class="form-section">
+  <h6>Selling Price Setup</h6>
+  <div class="mb-3">
+    <label class="input-label-sm d-block mb-2">Pricing Driver</label>
+    <div class="d-flex gap-2">
+      {% for d, label in [("Wastage","Wastage"),("Method A","Method A (₹/g)"),("Method D","Method D (%)")] %}
+      <label class="driver-btn {{ 'active' if (product and product.sell_driver==d) or (not product and d=='Wastage') else '' }}">
+        <input type="radio" name="sell_driver" value="{{ d }}" style="display:none" {{ "checked" if (product and product.sell_driver==d) or (not product and d=='Wastage') else "" }} onchange="updateDriverUI()">{{ label }}
+      </label>{% endfor %}
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4"><label class="input-label-sm">Selling Wastage</label><input type="number" name="sell_wastage" class="form-control" step="0.1" min="0" id="sellWastage" value="{{ product.sell_wastage if product else 102 }}"></div>
+    <div class="col-md-4"><label class="input-label-sm">Method A Making (₹/pg)</label><input type="number" name="sell_making_a" class="form-control" step="0.01" min="0" id="sellMakingA" value="{{ product.sell_making_a if product else 300 }}"></div>
+    <div class="col-md-4"><label class="input-label-sm">Method D Making (%)</label><input type="number" name="sell_making_d" class="form-control" step="0.01" min="0" id="sellMakingD" value="{{ (product.sell_making_d*100)|round(2) if product else 11 }}" placeholder="e.g. 11 for 11%"></div>
+  </div>
+</div>
+<div class="pricing-preview mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h6 class="mb-0 text-white">Live Price Preview</h6>
+    <small style="opacity:.7">24k ₹<span id="previewRate">{{ rate }}</span>/g</small>
+  </div>
+  <div class="row g-2">
+    <div class="col-6 col-md-3 text-center"><div style="opacity:.7;font-size:.75rem">Gold Value</div><div class="fw-bold fs-5" id="pvGoldVal">—</div></div>
+    <div class="col-6 col-md-3 text-center"><div style="opacity:.7;font-size:.75rem">Making</div><div class="fw-bold fs-5" id="pvMaking">—</div></div>
+    <div class="col-6 col-md-3 text-center"><div style="opacity:.7;font-size:.75rem">GST</div><div class="fw-bold fs-5" id="pvGST">—</div></div>
+    <div class="col-6 col-md-3 text-center"><div style="opacity:.7;font-size:.75rem">Sell Price</div><div class="fw-bold" style="font-size:1.5rem" id="pvSellPrice">—</div></div>
+  </div>
+  <div class="mt-2 pt-2 border-top border-white border-opacity-25 row g-1 small">
+    <div class="col-auto">Margin: <strong id="pvMargin"></strong></div>
+    <div class="col-auto ms-3">Wastage: <strong id="pvWastage"></strong></div>
+  </div>
+</div>
+<div class="d-flex gap-2">
+  <button type="submit" class="btn btn-gold px-4">{{ "Update" if product else "Save Product" }}</button>
+  <a href="/products" class="btn btn-outline-secondary">Cancel</a>
+</div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+const PURITY_MAP = {{ purity_map | tojson }};
+const TODAY_RATE = {{ rate }};
+function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function getVal(id){ return parseFloat(document.getElementById(id).value) || 0; }
+function recalc(){
+  const gross=getVal('grossWt'),stone=getVal('stoneWt'),misc=getVal('miscWt'),net=Math.max(0,gross-stone-misc);
+  document.getElementById('netWtDisplay').textContent=net.toFixed(3);
+  const purity=document.getElementById('puritySelect').value,pw=PURITUE_MAP[purity]||92,premium=getVal('purchasePremium');
+  const totalCost=net*(getVal('purchaseRate')*(pw+premium)/100)+getVal('stoneCost')+getVal('miscCost');
+  document.getElementById('totalCostDisplay').textContent=fmt(totalCost);
+  const driver=document.querySelector('[name="sell_driver"]:checked').value,wst=getVal('sellWastage'),m=getVal('sellMakingA'),md=getVal('sellMakingD')/100,pr=TODAY_RATE,purRate=pr*pw/100;
+  let gv=driver==='Wastage'?net*(pr*wst/100):driver==='Method A'?net*(pr+m):net*purRate*(1+md);
+  const gst=gv*0.03,sp=gv+gst;document.getElementById('pvGoldVal').textContent=fmt(gv);document.getElementById('pvMaking').textContent=fmt(gv-(net*pr));document.getElementById('pvGST').textContent=fmt(gst);document.getElementById('pvSellPrice').textContent=fmt(sp);
+  const effW=net&&pr?(gv/(nz�ppri)*100):0,ba=net?(gv/net-pr):0;
+  document.getElementById('pvMargin').textContent=fmt(sp-totalCost);document.getElementById('pvWastage').textContent=effW.toFixed(2);
+  if(driver==='Wastage'){document.getElementById('sellMakingA').value=Math.round(ba);}else if(driver==='Method A'){document.getElementById('sellWastage').value=effW.toFixed(2);}else{document.getElementById('sellWastage').value=effW.toFixed(2);document.getElementById('sellMakingA').value=Math.round(ba);}
+}
+function updateDriverUI(){
+  document.querySelectorAll('.driver-btn').forEach(b=>{bclassList.remove('active');if(b.querySelector('input[type=radio]').checked)b.classList.add('active');});
+  ['sellWastage','sellMakingA','sellMakingD'].forEach(id=>document.getElementById(id).classList.remove('input-highlight'));
+  const d=document.querySelector('[name="sell_driver"]:checked').value;
+  if(d==='Wastage')document.getElementById('sellWastage').classList.add('input-highlight');
+  else if(d==='Method A')document.getElementById('sellMakingA').classList.add('input-highlight');
+  else document.getElementById('sellMakingD').classList.add('input-highlight');
+  recalc();
+}
+document.querySelectorAll('.driver-btn').forEach(b=>b.addEventListener('click',()=>{b.querySelector('input').checked=true;updateDriverUI();}));
+document.querySelectorAll('input[type=number],select').forEach(el=>el.addEventListener('input',recalc));
+updateDriverUI();
+</script>
+{% endblock %}
