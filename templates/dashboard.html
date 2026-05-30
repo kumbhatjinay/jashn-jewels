@@ -16,3 +16,80 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Gold Rate Card -->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-5">
+        <h6 class="text-muted mb-1">Current 24k Gold Rate</h6>
+        {% if gold %}
+          <h2 class="fw-bold mb-0" style="color:var(--gold-dark)">₹{{ "{:,.2f}".format(gold.rate_24k) }} <small class="fs-6 text-muted">/gram</small></h2>
+          <div class="mt-1">
+            <span class="badge bg-secondary">{{ gold.source }}</span>
+            <small class="text-muted ms-2">Updated {{ gold.fetched_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+          </div>
+          <div class="mt-2 p-2 rounded" style="background:var(--gold-light);font-size:.85rem">
+            <strong>Derived rates:</strong>
+            22k ₹{{ "{:,.0f}".format(gold.rate_24k * 0.92) }}/g &nbsp;|&nbsp;
+            18k ₹{{ "{:,.0f}".format(gold.rate_24k * 0.75) }}/g &nbsp;|&nbsp;
+            14k ₹{{ "{:,.0f}".format(gold.rate_24k * 0.585) }}/g
+          </div>
+        {% else %}
+          <p class="text-danger">No gold rate set yet. Please set one below.</p>
+        {% endif %}
+      </div>
+      <div class="col-md-7">
+        <div class="row g-2 mt-2 mt-md-0">
+          <div class="col-12">
+            <p class="input-label-sm mb-1">Manual Update</p>
+            <form method="POST" action="/gold/update" class="d-flex gap-2">
+              <input type="number" name="rate" class="form-control" placeholder="e.g. 9500" step="0.01" min="1" required style="max-width:180px">
+              <button class="btn btn-gold"><i class="fas fa-pen me-1"></i>Set Rate</button>
+            </form>
+          </div>
+          <div class="col-12">
+            <form method="POST" action="/gold/fetch">
+              <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-sync me-1"></i>Fetch Live Rate Now</button>
+              <small class="text-muted ms-2">(Auto-fetches every hour)</small>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center p-3">
+      <div style="font-size:2rem;color:var(--gold)"><i class="fas fa-ring"></i></div>
+      <div class="fw-bold fs-4">{{ total_products }}</div>
+      <div class="text-muted small">Total Products</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center p-3">
+      <div style="font-size:2rem;color:var(--gold)"><i class="fas fa-qrcode"></i></div>
+      <div class="fw-bold fs-4">{{ total_products }}</div>
+      <div class="text-muted small">QR Codes Ready</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="/products/add" class="card text-center p-3 text-decoration-none">
+      <div style="font-size:2rem;color:var(--gold)"><i class="fas fa-plus-circle"></i></div>
+      <div class="fw-bold text-dark">Add Item</div>
+      <div class="text-muted small">New product</div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="/scan" class="card text-center p-3 text-decoration-none">
+      <div style="font-size:2rem;color:var(--gold)"><i class="fas fa-camera"></i></div>
+      <div class="fw-bold text-dark">Scan QR</div>
+      <div class="text-muted small">Phone scanner</div>
+    </a>
+  </div>
+</div>
+
+{% endblock %}
