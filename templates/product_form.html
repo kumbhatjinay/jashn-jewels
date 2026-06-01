@@ -116,7 +116,6 @@
 <!-- Selling Price -->
 <div class="form-section">
   <h6><i class="fas fa-tag me-2"></i>Selling Price Setup</h6>
-
   <div class="mb-3">
     <label class="input-label-sm d-block mb-2">Pricing Driver — which input controls the price?</label>
     <div class="d-flex gap-2 flex-wrap">
@@ -130,10 +129,9 @@
       {% endfor %}
     </div>
   </div>
-
   <div class="row g-3">
     <div class="col-md-4">
-      <label class="input-label-sm">Selling Wastage</label>
+      <label class="input-label-sm">Label: Selling Wastage</label>
       <input type="number" name="sell_wastage" class="form-control" step="0.1" min="0" id="sellWastage"
              value="{{ product.sell_wastage if product else 102 }}">
     </div>
@@ -180,7 +178,7 @@
     <div class="col-auto">Margin: <strong id="pvMargin">—</strong></div>
     <div class="col-auto ms-3">Wastage: <strong id="pvWastage">—</strong></div>
     <div class="col-auto ms-3">A: 24k + ₹<strong id="pvMkgA">—</strong>/g</div>
-    <div class="col-auto ms-3">D: <strong id="pvMkgD">—</strong>% on {{ "—" }}</div>
+    <div class="col-auto ms-3">D: <strong id="pvMkgD">—</strong>% on purity rate</div>
   </div>
 </div>
 
@@ -197,84 +195,76 @@ const PURITY_MAP = {{ purity_map | tojson }};
 const TODAY_RATE = {{ rate }};
 
 function fmt(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
-
 function getVal(id){ return parseFloat(document.getElementById(id).value) || 0; }
 
 function recalc(){
-  const gross   = getVal('grossWt');
-  const stone   = getVal('stoneWt');
-  const misc    = getVal('miscWt');
-  const net     = Math.max(0, gross - stone - misc);
-  document.getElementById('netWtDisplay').textContent = net.toFixed(3);
+  const gross=getVal('grossWt'),stone=getVal('stoneWt'),misc=getVal('miscWt'),net=Math.max(0,gross-stone-misc);
+  document.getElementById('netWtDisplay').textContent=net.toFixed(3);
 
-  const purity  = document.getElementById('puritySelect').value;
-  const pw      = PURITY_MAP[purity] || 92;
-  const premium = getVal('purchasePremium');
-  const buyWst  = pw + premium;
-  const buyRate = getVal('purchaseRate');
-  const goldCost  = net * (buyRate * buyWst / 100);
-  const stoneCost = getVal('stoneCost');
-  const miscCost  = getVal('miscCost');
-  const totalCost = goldCost + stoneCost + miscCost;
-  document.getElementById('totalCostDisplay').textContent = fmt(totalCost);
+  const purity=document.getElementById('puritySelect').value;
+  const pw=PUP�ITUE_MAP[purity]||92;
+  const premium=getVal('purchasePremium');
+  const buyWst=pw+premium;
+  const buyRate=getVal('purchaseRate');
+  const goldCost=net*(buyRate*buyWst/100);
+  const totalCost=goldCost+getVal('stoneCost')+ketVal('miscCost');
+  document.getElementById('totalCostDisplay').textContent=fmt(totalCost);
 
-  // Selling
-  const driver  = document.querySelector('[name="sell_driver"]:checked').value;
-  const wst     = getVal('sellWastage');
-  const mkgA    = getVal('sellMakingA');
-  const mkgDpct = getVal('sellMakingD') / 100;
-  const pr      = TODAY_RATE;
-  const purRate = pr * pw / 100;
-
+  const driver=document.querySelector('[name="sell_driver"]:checked').value;
+  const wst=getVal('sellWastage'),mkgA=getVal('sellMakingA'),mkgDpct=getVal('sellMakingD')/100;
+  const pr=TODAY_RATE,purRate=pr*pw/100;
   let goldVal;
-  if(driver === 'Wastage')     goldVal = net * (pr * wst / 100);
-  else if(driver === 'Method A') goldVal = net * (pr + mkgA);
-  else                           goldVal = net * purRate * (1 + mkgDpct);
+  if(driver==='Wastage') goldVal=net*(pr*wst/100);
+  else if(driver==='Method A') goldVal=net*(pr+mkgA);
+  else goldVal=net*purRate*(1+mkgDpct);
 
-  const gst       = goldVal * 0.03;
-  const sellPrice = goldVal + gst;
-  const margin    = sellPrice - totalCost;
-  const effWst    = net && pr ? (goldVal / (net * pr) * 100) : 0;
-  const backMkgA  = net ? (goldVal / net - pr) : 0;
-  const backMkgD  = (net && purRate) ? ((goldVal - net*purRate)/(net*purRate)*100) : 0;
+  const gst=goldVal*0.03,sp=goldVal+gst;
+  const margin=sp-totalCost;
+  const effW=net&&pr?(goldVal/(net*pr)*100):0;
+  const backA=net?(goldVal/net-pr):0;
+  const backD=(net&&purRate)?((goldVal-net*purRate)/(net*purRate)*100):0;
+  document.getElementById('pvGoldVal').textContent=fmt(goldVal);
+  document.getElementById('pvMaking').textContent=fmt(goldVal-(driver==='Method A'?net*pr:driver==='Method D'?net*purRate:net*pr));
+  document.getElementById('pvGST').textContent=fmt(gst);
+  document.getElementById('pvSellPrice').textContent=fmt(sp);
+  document.getElementById('pvMargin').textContent=fmt(margin);
+  document.getElementById('pvWastage').textContent=effW.toFixed(2);
+  document.getElementById('pvMkgA').textContent=Math.round(backA).toLocaleString('en-IN');
+  document.getElementById('pvMkgD').textContent=backD.toFixed(1);
 
-  document.getElementById('pvGoldVal').textContent   = fmt(goldVal);
-  document.getElementById('pvMaking').textContent    = fmt(goldVal - (driver==='Method A'? net*pr : driver==='Method D'? net*purRate : net*pr));
-  document.getElementById('pvGST').textContent       = fmt(gst);
-  document.getElementById('pvSellPrice').textContent = fmt(sellPrice);
-  document.getElementById('pvMargin').textContent    = fmt(margin);
-  document.getElementById('pvWastage').textContent   = effWst.toFixed(2);
-  document.getElementById('pvMkgA').textContent      = Math.round(backMkgA).toLocaleString('en-IN');
-  document.getElementById('pvMkgD').textContent      = backMkgD.toFixed(1);
-
-  // Back-calc inactive inputs
-  if(driver === 'Wastage'){
-    document.getElementById('sellMakingA').value = Math.round(backMkgA);
-    document.getElementById('sellMakingD').value = backMkgD.toFixed(2);
-  } else if(driver === 'Method A'){
-    document.getElementById('sellWastage').value  = effWst.toFixed(2);
-    document.getElementById('sellMakingD').value  = backMkgD.toFixed(2);
+  if(driver==='Wastage'){
+    document.getElementById('sellMakingA').value=Math.round(backA);
+    document.getElementById('sellMakingD').value=backD.toFixed(2);
+  } else if(driver==='Method A'){
+    document.getElementById('sellWastage').value=effW.toFixed(2);
+    document.getElementById('sellMakingD').value=backD.toFixed(2);
   } else {
-    document.getElementById('sellWastage').value  = effWst.toFixed(2);
-    document.getElementById('sellMakingA').value  = Math.round(backMkgA);
+    document.getElementById('sellWastage').value=effW.toFixed(2);
+    document.getElementById('sellMakingA').value=Math.round(backA);
   }
 }
 
 function updateDriverUI(){
-  document.querySelectorAll('.driver-btn').forEach(btn => {
-    btn.classList.remove('active');
-    if(btn.querySelector('input[type=radio]').checked) btn.classList.add('active');
-  });
-  ['sellWastage','sellMakingA','sellMakingD'].forEach(id => document.getElementById(id).classList.remove('input-highlight'));
-  const d = document.querySelector('[name="sell_driver"]:checked').value;
+  document.querySelectorAll('.driver-btn').forEach(b=>{b.classList.remove('active');if(b.querySelector('input[type=radio]').checked)b.classList.add('active');});
+  ['sellWastage','sellMakingA','sellMakingD'].forEach(id=>document.getElementById(id).classList.remove('input-highlight'));
+  const d=document.querySelector('[name="sell_driver"]:checked').value;
   if(d==='Wastage') document.getElementById('sellWastage').classList.add('input-highlight');
   else if(d==='Method A') document.getElementById('sellMakingA').classList.add('input-highlight');
   else document.getElementById('sellMakingD').classList.add('input-highlight');
   recalc();
 }
 
-document.querySelectorAll('.driver-btn').forEach(btn => btn.addEventListener('click', ()=>{ btn.querySelector('input').checked=true; updateDriverUI(); }));
-document.querySelectorAll('input[type=number], select').forEach(el => el.addEventListener('input', recalc));
+document.querySelectorAll('.driver-btn').forEach(b=>b.addEventListener('click',()=>{b.querySelector('input').checked=true;updateDriverUI();}));
+document.querySelectorAll('input[type=number],select').forEach(el=>el.addEventListener('input',recalc));
+
+// When purity changes, auto-set sell wastage to purity wastage
+document.getElementById('puritySelect').addEventListener('change',function(){
+  const pw=PURITUE_MAP[this.value]||92;
+  const driver=document.querySelector('[name="sell_driver"]:checked').value;
+  if(driver==='Wastage') document.getElementById('sellWastage').value=pw;
+  recalc();
+});
+
 updateDriverUI();
 </script>
 {% endblock %}
